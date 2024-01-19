@@ -1,11 +1,9 @@
-import java.net.*;
-import java.io.*;
-import tcpclient.TCPClient;
+import java.io.IOException;
 
- public class TCPAsk {
-    public static void main( String[] args) throws InterruptedException {
-        String hostname = null;
-        int port = 0;
+public class TCPAsk {
+    public static void main(String[] args) throws InterruptedException {
+        String hostname = localhost;
+        int port = 8080;
         String userInput = null;
 
         try {
@@ -25,8 +23,7 @@ import tcpclient.TCPClient;
                 builder.append("\n");
                 userInput = builder.toString();
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             System.err.println("Usage: TCPAsk host port <data to server>");
             System.exit(1);
         }
@@ -35,12 +32,11 @@ import tcpclient.TCPClient;
             if (userInput != null)
                 serverOutput = TCPClient.askServer(hostname, port, userInput);
             else
-                serverOutput = TCPClient.askServer(hostname, port);                
+                serverOutput = TCPClient.askServer(hostname, port);
             System.out.printf("%s:%d says:\n%s", hostname, port, serverOutput);
-        } catch(IOException ex) {
+        } catch (IOException ex) {
             System.err.println(ex);
             System.exit(1);
         }
     }
 }
-
