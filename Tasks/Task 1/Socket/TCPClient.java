@@ -1,114 +1,57 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Scanner;
-
+import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 public class TCPClient {
-    private Socket socket;
-    private BufferedReader bufferedReader;
-    private BufferedWriter bufferedWriter;
-    private ByteArrayOutputStream baos;
-    Scanner scanner = new Scanner(System.in);
-
-    public TCPClient() {
-        this.socket = null;
-        this.bufferedReader = null;
-        this.bufferedWriter = null;
-        this.baos = new ByteArrayOutputStream();
-    }
-
-    public byte[] askServer(String hostname, int port, byte[] bytesToServer) throws IOException {
-        // Connect to the server
-        this.socket = new Socket(hostname, port);
-
-        // Ask the user for input
-        System.out.print("Input: ");
-        String userInput = scanner.nextLine();
-
-        // Write the user input to the ByteArrayOutputStream
-        this.baos.write(userInput.getBytes());
-
-        // Initialize the reader and writer
-        this.bufferedReader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-        this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream()));
-
-        // Write the bytes to the server
-        this.bufferedWriter.write(new String(bytesToServer));
-        this.bufferedWriter.flush();
-        // Read the response from the server
-
-        // Write the response to the ByteArrayOutputStream
-        return this.baos.toByteArray();
-    }
-
-    public byte[] listenToServer(String hostname, int port, byte[] bytesToServer) throws IOException {
-        // Connect to the server
-        this.socket = new Socket(hostname, port);
-
-        // Initialize the reader and writer
-        this.bufferedReader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-        this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream()));
-
-        // Write the bytes to the server
-        this.bufferedWriter.write(new String(bytesToServer));
-        this.bufferedWriter.flush();
-        // Read the response from the server
-
-        // Write the response to the ByteArrayOutputStream
-        return this.baos.toByteArray();
-    }
-
-    public static void main(String[] args) throws IOException {
-
-        TCPClient client = new TCPClient();
-        byte[] response = client.askServer("localhost", 8080, "Hello, Server!".getBytes());
-        System.out.println(new String(response));
-
-    }
-
-}
-
-public class TCPAsk {
-    public static void main(String[] args) throws InterruptedException {
-        String hostname = localhost;
-        int port = 8080;
-        String userInput = null;
-
-        try {
-            hostname = args[0];
-            port = Integer.parseInt(args[1]);
-            if (args.length >= 3) {
-                // Collect remaining arguments into a single string
-                StringBuilder builder = new StringBuilder();
-                boolean first = true;
-                for (int i = 2; i < args.length; i++) {
-                    if (first)
-                        first = false;
-                    else
-                        builder.append(" ");
-                    builder.append(args[i]);
+    
+    // Method for handling two arguments (hostname and port)
+    public static String askServer(String hostname, int port) throws IOException {
+        try (
+            Socket socket = new Socket(hostname, port); // Create a new Socket and connect it to the server
+            OutputStream outputStream = socket.getOutputStream(); // Get the output stream from the socket
+            InputStream inputStream = socket.getInputStream(); // Get the input stream from the socket
+        ){
+            ByteArrayOutputStream responseStream = new ByteArrayOutputStream(); // Create a new ByteArrayOutputStream to store the response from the server
+            byte[] buffer = new byte[1024]; // Create a buffer to store the response from the server
+            int bytesRead;  // Create a variable to store the number of bytes read from the server
+        
+            try {
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    responseStream.write(buffer, 0, bytesRead);   
                 }
-                builder.append("\n");
-                userInput = builder.toString();
+            } catch (IOException e) {
+                System.err.println(e);
             }
-        } catch (Exception ex) {
-            System.err.println("Usage: TCPAsk host port <data to server>");
-            System.exit(1);
+
+            byte[] outputData = responseStream.toByteArray();
+            return new String(outputData, StandardCharsets.UTF_8);
         }
-        try {
-            String serverOutput;
-            if (userInput != null)
-                serverOutput = TCPClient.askServer(hostname, port, userInput);
-            else
-                serverOutput = TCPClient.askServer(hostname, port);
-            System.out.printf("%s:%d says:\n%s", hostname, port, serverOutput);
-        } catch (IOException ex) {
-            System.err.println(ex);
-            System.exit(1);
+    }
+
+    public static String askServer(String hostname, int port, String stringToServer) throws IOException {
+        try (
+            Socket socket = new Socket(hostname, port); // Create a new Socket and connect it to the server
+            OutputStream outputStream = socket.getOutputStream(); // Get the output stream from the socket
+            InputStream inputStream = socket.getInputStream(); // Get the input stream from the socket
+        ){
+            byte[] bytesToServer = stringToServer.getBytes(StandardCharsets.UTF_8);
+            outputStream.write(bytesToServer); // Send bytes to server
+            ByteArrayOutputStream responseStream = new ByteArrayOutputStream(); // Create a new ByteArrayOutputStream to store the response from the server
+            byte[] buffer = new byte[1024]; // Create a buffer to store the response from the server
+            int bytesRead;  // Create a variable to store the number of bytes read from the server
+        
+            try {
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    responseStream.write(buffer, 0, bytesRead);   
+                }
+            } catch (IOException e) {
+                System.err.println(e);
+            }
+
+            byte[] outputData = responseStream.toByteArray();
+            return new String(outputData, StandardCharsets.UTF_8);
         }
     }
 }
