@@ -1,6 +1,27 @@
+###Student1###
 107
 USERNAME: user107
 PASSWORD: IyOWU4MzQ4Mm
 
-USERNAME: student
-PASSWORD: lab_IK1203
+user107
+
+IyOWU4MzQ4Mm
+
+Holmertz
+
+David
+
+holmertz@kth.se
+
+###Student2###
+129
+
+user129
+
+gwNjIxODA3ZG
+
+Koivusalo
+
+Robert
+
+robertko@kth.se
